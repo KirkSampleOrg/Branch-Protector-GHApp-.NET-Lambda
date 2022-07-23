@@ -30,7 +30,23 @@ _Note: you will deploy the .NET 6 project to AWS Lambda before creating the Gith
 
 ### Deploy the .NET 6 application to AWS Lambda
 
-TBD
+Ensure you can build the `orgbranchprotection.csproj` project locally - it targets .NET 6.0. Then edit the text of the issues that get automatically created by the code, and deploy the code to a new Lambda function. Finally, you'll create a URL for your new Lambda function.
+
+**Issue Text**
+Open the file `/src/issuetext.md` in a text editor.  Replace the mention of me (@Kirkaiya) with the GitHub handle of whatever user you want mentioned in the issues that the Lambda function creates, and feel free to edit the issue markdown text as desired.
+
+**Deploy as a new .NET Lambda function**
+
+The easist way to deploy the code is using Visual Studio (2019 or 2022) with the [AWS Toolkit for Visual Studio](https://aws.amazon.com/visualstudio/) extension. You can also deploy the Lambda function using the [.NET Core Global Tools for AWS](https://aws.amazon.com/blogs/developer/net-core-global-tools-for-aws/), which let you deploy .NET Lambda functions using the command line, which is especially useful for automating deployments in CI/CD pipelines.
+
+_Note: if you plan to have the Lambda function publish notifications to an SNS topic, you'll need to modify the [Lambda execution role](https://docs.aws.amazon.com/lambda/latest/dg/lambda-permissions.html) to give it [permissions](https://docs.aws.amazon.com/lambda/latest/dg/lambda-permissions.html) to publish to your SNS topic._
+
+**Lambda Function URL**
+
+After you deploy the _orgbranchprotection.csproj_ project to a new AWS Lambda function, in the AWS Lambda console, select the 'Configuration' tab, then select 'Function URL' from the left menu. Select 'Create function URL', then under 'Auth type' select 'None'.
+_Note: the C# code in the project validates the GitHub App's webhook secret, so the authentication is happening in code_.
+
+Save your changes, and make note of the function's URL. You'll need it below.
 
 ### Create and register a new GitHub App
 
@@ -60,6 +76,32 @@ Follow the instructions in the GitHub docs for [Installing GitHub Apps](https://
 
 ### Configure Lambda function environment variables
 
+Now that your GitHub app is configured and installed for your organization (or account), you'll need to configure your Lambda function with environment variables that correspond to your GitHub App's App ID, the installation ID, and the private key you generated. You can also specify an AWS SNS (Simple Notification Service) topic ARN if you want to have the Lambda function send notifications when it applies protections to a newly-created repo. Lambda function environment variables are encrypted at rest for security.
+
+In your AWS Lambda console, in the 'Configuration' tab for your function, select 'Environment Variables' in the left menu, and then select 'Edit'. Add a new Environment Variable (a Key and Value) for each of the items below:
+
+**App ID**
+If you didn't make a note of your App ID earlier, go to your organization/account's settings, expand 'Developer Settings' on the left menu, and select 'GitHub Apps'. Then, click the 'Edit' button for this app. The App ID for the application is then displayed under the 'About' section (it's a number).  Create a new environment variable with Key = `GITHUB_APPID` and and enter the App ID into the value field.
+
+**Installation ID**
+Your GitHub App could be installed in multiple organizations and accounts, and we need the installation ID for the installation you did earlier. From your organization/account's settings, under 'Integrations' in the left menu, select 'GitHub Apps' (_Note: not under Developer Settings_). This will show the list of installed apps (see screenshot below). Select the 'Configure' button to show the app's permissions; the installation ID is the number at the end of the URL. For example, if the URL in your browser is `https://github.com/organizations/KirkSampleOrg/settings/installations/12345678`, the installation ID is 12345678.
 
 ![Installed GitHub Apps list](docs/installed-github-apps.png)
+Create a new environment variable with Key = `INSTALLATION_ID` and enter the installation ID into the value field.
+
+**Private Key**
+Rather than storing the private key (the .pem file you generated earlier) in your repo and loading it from a file, which would risk exposing it, we'll store the contents in an environment variable. An even better solution would be storing the key contents in an AWS Secrets Manager secret, but for the purposes of this solution that's out of scope. We'll need to get the key text all in a single line of text for this.
+
+Open up the .pem file in a text editor, and carefully delete the first line ("-----BEGIN RSA PRIVATE KEY-----") and the last line ("-----END RSA PRIVATE KEY-----"), then carefully delete the line-break until there is a single row of text with no line breaks (be careful not to delete any of the characters of the key).
+
+Create a new environment variable with the Key = `RSA_PRIVATEKEY` and enter the entire single line of key text into the value field.
+
+**SNS Flag and ARN**
+The .NET code as written checks to see if SNS notifications are enabled, and if so, sends the JSON contents of the webhook payload's repository node as a notification to an SNS topic. If you don't remove the code that handles this, you'll need to create two environment variables to avoid errors.
+
+Create a new environment variable with the Key = `SEND_SNS` and enter either `True` or `False` in the value field. If you enter True, you'll need to [create an AWS SNS topic](tps://docs.aws.amazon.com/sns/latest/dg/sns-create-topic.html) in your AWS account and make note of the topic's ARN.
+
+Create another new environment variable with the Key = `SNSTOPIC_ARN`. If you entered False for the SEND_SNS variable, you can leave the value blank. Otherwise, enter the SNS topic ARN as the value.
+
+** You've now completed setting up the orgbranchprotectionauto GitHub app in your organization or account**.  Test the solution by creating a new repository, and then checking to see if branch protection settings were applied, and a new issue created.
 
