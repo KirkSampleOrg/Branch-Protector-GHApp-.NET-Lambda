@@ -20,13 +20,19 @@ The following sections show a high-level diagram of the solution, and then detai
 
 ## Solution Overview
 
+This solution uses a GitHub App that is subscribed to repository events - including the creation of new repos - and which is configured with a webhook URL pointing at an AWS Lambda function that is configured with a function URL. The GitHub App is installed for an account (such as an organization). When users in the account create new repositories, a webhook event fires, which sends an HTTP POST message to the Lambda function.
+
+The Lambda function uses a private key that you generate when configuring the GitHub App's authentication to generate a digitally-signed JWT token. The Lambda function uses this token to a retrieve short-lived installation-access token from the GitHub API.
+
+The Lambda function then uses that token to check whether a default branch exists in the newly-created repo (using the repo's configured default branch name that is sent in the webhook payload). If the branch doesn't exist, the Lambda function creates it by creating a blank readme file for that branch. Then, the Lambda function applies branch protection settings to the branch, and finally creates a new issue in the Repo that mentions you (or the user you configure). See the diagram below for a high-level illustration of the flow.
+
+![Solution Diagram](docs/Solution-diagram.png)
 
 ### GitHub App
 
 
 ### AWS Lambda function
 
-![Solution Diagram](docs/Solution-diagram.png)
 
 ## How to implement the solution
 
@@ -56,7 +62,11 @@ Follow the steps in the GitHub docs for [Creating a GitHub App](https://docs.git
 
 **Step 16**. Under 'Subscribe to events', select `Repository`.
 
-You have now created and registered your GitHub app. Next, you'll need to install it for your organization.
+### Configure authentication for your GitHub App
+
+Follow the instructions in [Authenticating with GitHub Apps](https://docs.github.com/en/developers/apps/building-github-apps/authenticating-with-github-apps) to **TBD**.
+
+**You have now created and registered your GitHub app. Next, you'll need to install it for your organization.**
 
 ### Install the GitHub App for your organization
 
