@@ -35,6 +35,7 @@ _Note: you will deploy the .NET 6 project to AWS Lambda before creating the Gith
 Ensure you can build the `orgbranchprotection.csproj` project locally - it targets .NET 6.0. Then edit the text of the issues that get automatically created by the code, and deploy the code to a new Lambda function. Finally, you'll create a URL for your new Lambda function.
 
 **Issue Text**
+
 Open the file `/src/issuetext.md` in a text editor.  Replace the mention of me (@Kirkaiya) with the GitHub handle of whatever user you want mentioned in the issues that the Lambda function creates, and feel free to edit the issue markdown text as desired.
 
 **Deploy as a new .NET Lambda function**
@@ -94,7 +95,7 @@ Create a new environment variable with Key = `INSTALLATION_ID` and enter the ins
 **Private Key**
 Rather than storing the private key (the .pem file you generated earlier) in your repo and loading it from a file, which would risk exposing it, we'll store the contents in an environment variable. An even better solution would be storing the key contents in an AWS Secrets Manager secret, but for the purposes of this solution that's out of scope. We'll need to get the key text all in a single line of text for this.
 
-Open up the .pem file in a text editor, and carefully delete the first line ("-----BEGIN RSA PRIVATE KEY-----") and the last line ("-----END RSA PRIVATE KEY-----"), then carefully delete the line-break until there is a single row of text with no line breaks (be careful not to delete any of the characters of the key).
+Open up the .pem file in a text editor, and carefully delete the first line ("-----BEGIN RSA PRIVATE KEY-----") and the last line ("-----END RSA PRIVATE KEY-----"), then carefully delete all the line-breaks until there is a single row of text with no line breaks (be careful not to delete any of the characters of the key).
 
 Create a new environment variable with the Key = `RSA_PRIVATEKEY` and enter the entire single line of key text into the value field.
 
