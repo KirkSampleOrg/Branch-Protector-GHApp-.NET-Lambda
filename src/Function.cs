@@ -19,6 +19,7 @@ public class Function
     private static AccessToken? accessToken;
     private readonly long Installation = 11111111;
     private readonly string SnsTopicArn = ""; 
+    private readonly string WebHookSecret = "";
 
 
     public Function()
@@ -27,6 +28,7 @@ public class Function
 
         SnsTopicArn = Environment.GetEnvironmentVariable("SNSTOPIC_ARN")!;
         Installation = long.Parse(Environment.GetEnvironmentVariable("INSTALLATION_ID")!);
+        WebHookSecret = Environment.GetEnvironmentVariable("WEBHOOK_SECRET")!;
         var iss = Environment.GetEnvironmentVariable("GITHUB_APPID")!;  //Issuer is your APP ID
         var privKey = Convert.FromBase64String(Environment.GetEnvironmentVariable("RSA_PRIVATEKEY")!);
 
@@ -102,7 +104,7 @@ public class Function
             
         var headerSig = headers.First(x => x.Key.Equals("X-Hub-Signature-256", StringComparison.InvariantCultureIgnoreCase)).Value;
         
-        using var sha = new HMACSHA256(Encoding.UTF8.GetBytes("thisisasamplesecret"));
+        using var sha = new HMACSHA256(Encoding.UTF8.GetBytes(WebHookSecret));
         var hash = "sha256=" + BitConverter.ToString(sha.ComputeHash(Encoding.UTF8.GetBytes(body))).Replace("-", "");
 
         return hash.Equals(headerSig, StringComparison.InvariantCultureIgnoreCase);

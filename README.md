@@ -2,10 +2,6 @@
 
 A solution for automating the protection of the default branch in newly-created GitHub repos. The solution is built in .NET 6 and configured to run in an AWS Lambda function using the Lambda Function URL feature to expose it over HTTP.
 
-### This readme file will contain the documentation and instructions for deploying the solution
-
-**Content TBD**
-
 ## Background
 Over time, organizations often find they create an increasing number of code repos in GitHub. Manual processes to enforce quality controls, such as ensuring code is reviewed prior to being merged into the main branch, can fail to keep up. Fortunately, GitHub apps can be used to automate this process. This solution implements a GitHub app that automatically applies branch protection rules to the default branch in newly-created repos. If the new repo was created without a default branch, the solution will create the default branch (using the branchname configured as default for the GitHub organization) in the repo by creating a README file in the root of the repo.
 
@@ -22,17 +18,11 @@ The following sections show a high-level diagram of the solution, and then detai
 
 This solution uses a GitHub App that is subscribed to repository events - including the creation of new repos - and which is configured with a webhook URL pointing at an AWS Lambda function that is configured with a function URL. The GitHub App is installed for an account (such as an organization). When users in the account create new repositories, a webhook event fires, which sends an HTTP POST message to the Lambda function.
 
-The Lambda function uses a private key that you generate when configuring the GitHub App's authentication to generate a digitally-signed JWT token. The Lambda function uses this token to a retrieve short-lived installation-access token from the GitHub API.
+The Lambda function uses a private key that you generate when configuring the GitHub App's authentication to generate a digitally-signed JWT (JASON Web Token). The Lambda function uses this JWT to a retrieve short-lived installation-access token from the GitHub API, which it uses in subsequent requests. The Lambda function uses the [octokit.net NuGet package](https://www.nuget.org/packages/Octokit) to make calls to the GitHub API at api.github.com.
 
-The Lambda function then uses that token to check whether a default branch exists in the newly-created repo (using the repo's configured default branch name that is sent in the webhook payload). If the branch doesn't exist, the Lambda function creates it by creating a blank readme file for that branch. Then, the Lambda function applies branch protection settings to the branch, and finally creates a new issue in the Repo that mentions you (or the user you configure). See the diagram below for a high-level illustration of the flow.
+The Lambda function then checks whether a default branch exists in the newly-created repo (using the repo's configured default branch name that is sent in the webhook payload). If the branch doesn't exist, the Lambda function creates it by creating a blank readme file for that branch. Then, the Lambda function applies branch protection settings to the branch, and finally creates a new issue in the Repo that mentions you (or the user you configure). See the diagram below for a high-level illustration of the flow.
 
 ![Solution Diagram](docs/Solution-diagram.png)
-
-### GitHub App
-
-
-### AWS Lambda function
-
 
 ## How to implement the solution
 
@@ -41,8 +31,6 @@ _Note: you will deploy the .NET 6 project to AWS Lambda before creating the Gith
 ### Deploy the .NET 6 application to AWS Lambda
 
 TBD
-
-### Create and install the GitHub App
 
 ### Create and register a new GitHub App
 
@@ -64,14 +52,14 @@ Follow the steps in the GitHub docs for [Creating a GitHub App](https://docs.git
 
 ### Configure authentication for your GitHub App
 
-Follow the instructions in [Authenticating with GitHub Apps](https://docs.github.com/en/developers/apps/building-github-apps/authenticating-with-github-apps) to **TBD**.
+Follow the instructions in [Authenticating with GitHub Apps](https://docs.github.com/en/developers/apps/building-github-apps/authenticating-with-github-apps) to generate a private key. When you generate a new key, it will automatically download in your browser as a .pem file. Store your .pem file in a secure place, and never share it. You'll need it to configure your Lambda function.
 
-**You have now created and registered your GitHub app. Next, you'll need to install it for your organization.**
+### Install your GitHub App in your organization (or account)
 
-### Install the GitHub App for your organization
-
-TBD
+Follow the instructions in the GitHub docs for [Installing GitHub Apps](https://docs.github.com/en/developers/apps/managing-github-apps/installing-github-apps) to install your app for your organization or GitHub account. Be sure to select "All repositories", so that your app can interact with newly-created repos.
 
 ### Configure Lambda function environment variables
 
-TBD
+
+![Installed GitHub Apps list](docs/installed-github-apps.png)
+
