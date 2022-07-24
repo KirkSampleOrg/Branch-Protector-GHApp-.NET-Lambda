@@ -84,15 +84,18 @@ Now that your GitHub app is configured and installed for your organization (or a
 In your AWS Lambda console, in the 'Configuration' tab for your function, select 'Environment Variables' in the left menu, and then select 'Edit'. Add a new Environment Variable (a Key and Value) for each of the items below:
 
 **App ID**
+
 If you didn't make a note of your App ID earlier, go to your organization/account's settings, expand 'Developer Settings' on the left menu, and select 'GitHub Apps'. Then, click the 'Edit' button for this app. The App ID for the application is then displayed under the 'About' section (it's a number).  Create a new environment variable with Key = `GITHUB_APPID` and and enter the App ID into the value field.
 
 **Installation ID**
+
 Your GitHub App could be installed in multiple organizations and accounts, and we need the installation ID for the installation you did earlier. From your organization/account's settings, under 'Integrations' in the left menu, select 'GitHub Apps' (_Note: not under Developer Settings_). This will show the list of installed apps (see screenshot below). Select the 'Configure' button to show the app's permissions; the installation ID is the number at the end of the URL. For example, if the URL in your browser is `https://github.com/organizations/KirkSampleOrg/settings/installations/12345678`, the installation ID is 12345678.
 
 ![Installed GitHub Apps list](docs/installed-github-apps.png)
 Create a new environment variable with Key = `INSTALLATION_ID` and enter the installation ID into the value field.
 
 **Private Key**
+
 Rather than storing the private key (the .pem file you generated earlier) in your repo and loading it from a file, which would risk exposing it, we'll store the contents in an environment variable. An even better solution would be storing the key contents in an AWS Secrets Manager secret, but for the purposes of this solution that's out of scope. We'll need to get the key text all in a single line of text for this.
 
 Open up the .pem file in a text editor, and carefully delete the first line ("-----BEGIN RSA PRIVATE KEY-----") and the last line ("-----END RSA PRIVATE KEY-----"), then carefully delete all the line-breaks until there is a single row of text with no line breaks (be careful not to delete any of the characters of the key).
@@ -100,11 +103,12 @@ Open up the .pem file in a text editor, and carefully delete the first line ("--
 Create a new environment variable with the Key = `RSA_PRIVATEKEY` and enter the entire single line of key text into the value field.
 
 **SNS Flag and ARN**
+
 The .NET code as written checks to see if SNS notifications are enabled, and if so, sends the JSON contents of the webhook payload's repository node as a notification to an SNS topic. If you don't remove the code that handles this, you'll need to create two environment variables to avoid errors.
 
 Create a new environment variable with the Key = `SEND_SNS` and enter either `True` or `False` in the value field. If you enter True, you'll need to [create an AWS SNS topic](tps://docs.aws.amazon.com/sns/latest/dg/sns-create-topic.html) in your AWS account and make note of the topic's ARN.
 
 Create another new environment variable with the Key = `SNSTOPIC_ARN`. If you entered False for the SEND_SNS variable, you can leave the value blank. Otherwise, enter the SNS topic ARN as the value.
 
-** You've now completed setting up the orgbranchprotectionauto GitHub app in your organization or account**.  Test the solution by creating a new repository, and then checking to see if branch protection settings were applied, and a new issue created.
+**You've now completed setting up the orgbranchprotectionauto GitHub app in your organization or account**.  Test the solution by creating a new repository, and then checking to see if branch protection settings were applied, and a new issue created.
 
