@@ -1,6 +1,6 @@
 # Branch Protector GitHub App for AWS Lambda in .NET 6
 
-A solution for automating the protection of the default branch in newly-created GitHub repos. The solution is built in .NET 6 and configured to run in an AWS Lambda function using the Lambda Function URL feature to expose it over HTTP.
+A solution for automating the protection of the default branch in newly-created GitHub repos. The solution is built on .NET 6 and configured to run in an AWS Lambda function using the Lambda Function URL feature to expose it over HTTP.
 
 ## Background
 Over time, organizations often find they create an increasing number of code repos in GitHub. Manual processes to enforce quality controls, such as ensuring code is reviewed prior to being merged into the main branch, can fail to keep up. Fortunately, GitHub apps can be used to automate this process. This solution implements a GitHub app that automatically applies branch protection rules to the default branch in newly-created repos. If the new repo was created without a default branch, the solution will create the default branch (using the branchname configured as default for the GitHub organization) in the repo by creating a README file in the root of the repo.

@@ -8,8 +8,6 @@ namespace orgbranchprotection
     {
         private RSA _rsa;
         private readonly byte[] _privateKey;
-        private readonly string _aud;
-        private readonly string _kid;
         private readonly string _iss;
         private bool disposedValue;
 

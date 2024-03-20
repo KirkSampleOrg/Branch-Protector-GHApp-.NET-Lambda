@@ -23,6 +23,6 @@
     <PackageReference Include="Amazon.Lambda.Serialization.SystemTextJson" Version="2.2.0" />
     <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.3.76" />
     <PackageReference Include="Octokit" Version="0.52.0" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.21.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.35.0" />
   </ItemGroup>
 </Project>
